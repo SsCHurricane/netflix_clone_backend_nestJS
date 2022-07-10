@@ -1,0 +1,20 @@
+version: '3.5'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongoDb
+    restart: always
+
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=hurricane
+      - MONGO_INITDB_ROOT_PASSWORD=12345678
+      - MONGO_INITDB_DATABASE=netflixClone
+    ports:
+      - 27018:27017
+    volumes:
+      - ./mongo-data:/data/db:delegated
+
+    command: --wiredTigerCacheSizeGB 1.5
+volumes:
+  db-data:
