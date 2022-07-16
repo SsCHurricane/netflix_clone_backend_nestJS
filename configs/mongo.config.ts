@@ -19,7 +19,8 @@ const getMongoUri = (configService: ConfigService) =>
   configService.get('MONGO_HOST') +
   ':' +
   configService.get('MONGO_PORT') +
-  '/';
+  '/' +
+  configService.get('MONGO_DB_NAME');
 
 export const getMongoOptions = () => ({
   useNewUrlParser: true,

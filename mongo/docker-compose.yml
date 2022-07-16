@@ -1,20 +1,18 @@
-version: '3.5'
+version: '3.8'
 
 services:
   mongo:
     image: mongo:latest
     container_name: mongoDb
     restart: always
-
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=hurricane
-      - MONGO_INITDB_ROOT_PASSWORD=12345678
-      - MONGO_INITDB_DATABASE=netflixClone
+      MONGO_INITDB_ROOT_USERNAME: hurricane
+      MONGO_INITDB_ROOT_PASSWORD: 12345678
+      MONGO_INITDB_DATABASE: netflix-clone
     ports:
       - 27018:27017
     volumes:
-      - ./mongo-data:/data/db:delegated
-
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./mongo-data:/data/db
     command: --wiredTigerCacheSizeGB 1.5
-volumes:
-  db-data:
+    
