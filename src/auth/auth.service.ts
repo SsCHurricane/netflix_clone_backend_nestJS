@@ -9,8 +9,14 @@ import { InjectModel } from 'nestjs-typegoose';
 import { UserModel } from 'src/user/user.model';
 import { UserDto } from './dto/user.dto';
 
-import { UNAUTHORIZED, WRONG_EMAIL } from './constants/errors.constants';
+import {
+  INVALID_TOKEN,
+  SIGNUP_OR_LOGIN,
+  UNAUTHORIZED,
+  WRONG_EMAIL,
+} from './constants/errors.constants';
 import { JwtService } from '@nestjs/jwt';
+import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,12 +35,7 @@ export class AuthService {
       password: await this.getHashedPassword(password),
     });
 
-    const tokens = await this.generateTokensPair(String(newUser._id));
-
-    return {
-      user: this.getReturningUserFields(newUser),
-      ...tokens,
-    };
+    return this.getUserWithToken(newUser);
   }
 
   async login({ email, password }: UserDto) {
@@ -49,12 +50,27 @@ export class AuthService {
 
     if (!isPasswordCorrect) throw new UnauthorizedException(UNAUTHORIZED);
 
-    const tokens = await this.generateTokensPair(String(user._id));
+    return this.getUserWithToken(user);
+  }
 
-    return {
-      user: this.getReturningUserFields(user),
-      ...tokens,
-    };
+  async getNewTokens({ refreshToken }: RefreshTokenDto) {
+    if (!refreshToken) throw new UnauthorizedException(SIGNUP_OR_LOGIN);
+
+    let res: { _id: string } = {} as { _id: string };
+
+    try {
+      const { _id } = await this.jwtService.verifyAsync(refreshToken);
+
+      res = { _id };
+    } catch (error) {
+      throw new UnauthorizedException(INVALID_TOKEN);
+    }
+
+    const user = await this.UserModel.findById(res._id);
+
+    if (!user) throw new UnauthorizedException(INVALID_TOKEN);
+
+    return this.getUserWithToken(user);
   }
 
   async getHashedPassword(password: string) {
@@ -79,10 +95,15 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  getReturningUserFields(user: UserModel) {
+  async getUserWithToken(user: UserModel) {
+    const tokens = await this.generateTokensPair(String(user._id));
+
     return {
-      _id: user._id,
-      email: user.email,
+      user: {
+        _id: user._id,
+        email: user.email,
+      },
+      ...tokens,
     };
   }
 }
