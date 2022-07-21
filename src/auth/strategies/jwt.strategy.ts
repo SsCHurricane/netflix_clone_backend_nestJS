@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ModelType } from '@typegoose/typegoose/lib/types';
 import { InjectModel } from 'nestjs-typegoose';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserModel } from 'src/user/user.model';
+import { UserModel } from '@user/user.model';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
