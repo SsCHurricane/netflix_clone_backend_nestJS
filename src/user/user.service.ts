@@ -3,7 +3,12 @@ import { getHashedPassword } from '@helpers/password.helpers';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ModelType } from '@typegoose/typegoose/lib/types';
 import { InjectModel } from 'nestjs-typegoose';
-import { UpdateUserDto, UpdateUserRole } from './dto/updateUser.dto';
+import { async } from 'rxjs';
+import {
+	DeleteUserDto,
+	UpdateUserDto,
+	UpdateUserRole,
+} from './dto/updateUser.dto';
 import { UserModel } from './user.model';
 
 @Injectable()
@@ -42,12 +47,27 @@ export class UserService {
 	async updateUserRole({ role, _id }: UpdateUserRole) {
 		const user = await this.UserModel.findById(_id).exec();
 
-		if (!user) throw new BadRequestException(USER_NOT_FOUND);
+		if (!user) throw new BadRequestException(USER_NOT_FOUND(_id));
 
 		user.role = role;
 
 		await user.save();
 
 		return user;
+	}
+
+	async getAllUsers() {
+		return await this.UserModel.find().exec();
+	}
+
+	async deleteUsers({ ids }: DeleteUserDto) {
+		const errors: { messages: string[] } = { messages: [] };
+
+		for (let id of ids) {
+			const deletedUser = await this.UserModel.findByIdAndDelete(id).exec();
+			if (!deletedUser) errors.messages.push(USER_NOT_FOUND(id));
+		}
+
+		if (errors.messages.length > 0) throw new BadRequestException(errors);
 	}
 }

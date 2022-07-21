@@ -1,11 +1,14 @@
 import { INVALID_ROLE } from '@constants/errors.constants';
 import {
-	Contains,
+	ArrayMinSize,
+	IsArray,
 	IsEmail,
 	IsIn,
+	IsMongoId,
 	IsOptional,
 	IsString,
 	MinLength,
+	ValidateNested,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -30,6 +33,12 @@ export class UpdateUserRole {
 	})
 	role: roleType;
 
-	@IsString()
+	@IsMongoId()
 	_id: string;
+}
+
+export class DeleteUserDto {
+	@ArrayMinSize(1)
+	@IsMongoId({ each: true })
+	ids: string[];
 }

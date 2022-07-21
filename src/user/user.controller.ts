@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Delete,
 	Get,
 	Param,
 	Patch,
@@ -10,7 +11,11 @@ import {
 import { Auth } from '@auth/decorators/auth.decorator';
 import { User } from './decorators/user.decorator';
 import { UserService } from './user.service';
-import { UpdateUserDto, UpdateUserRole } from './dto/updateUser.dto';
+import {
+	DeleteUserDto,
+	UpdateUserDto,
+	UpdateUserRole,
+} from './dto/updateUser.dto';
 import { idValidationPipe } from '@pipes/idValidationPipe';
 
 @Controller('user')
@@ -50,5 +55,18 @@ export class UserController {
 		@Body() dto: UpdateUserDto,
 	) {
 		return await this.userService.updateUserProfile(_id, dto);
+	}
+
+	@Get('all')
+	@Auth('admin')
+	async getAllUsers() {
+		return await this.userService.getAllUsers();
+	}
+
+	@Delete('delete')
+	@UsePipes(new ValidationPipe())
+	@Auth('admin')
+	async deleteUsers(@Body() dto: DeleteUserDto) {
+		await this.userService.deleteUsers(dto);
 	}
 }
