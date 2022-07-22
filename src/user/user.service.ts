@@ -1,9 +1,9 @@
 import { EMAIL_ALREADY_EXIST, USER_NOT_FOUND } from '@constants/user.constants';
+import { UserHelpersService } from '@helpers/userHelpers/user.helpers.service';
 import { getHashedPassword } from '@helpers/password.helpers';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ModelType } from '@typegoose/typegoose/lib/types';
 import { InjectModel } from 'nestjs-typegoose';
-import { async } from 'rxjs';
 import {
 	DeleteUserDto,
 	UpdateUserDto,
@@ -15,10 +15,11 @@ import { UserModel } from './user.model';
 export class UserService {
 	constructor(
 		@InjectModel(UserModel) private readonly UserModel: ModelType<UserModel>,
+		private readonly UserHelpersService: UserHelpersService,
 	) {}
 
 	async getUserById(_id: string) {
-		const user = await this.UserModel.findById(_id).exec();
+		const user = await this.UserHelpersService.getById(this.UserModel, _id);
 
 		if (user.role == 'admin') return user;
 
@@ -27,6 +28,8 @@ export class UserService {
 
 	async updateUserProfile(_id: string, { email, password }: UpdateUserDto) {
 		const user = await this.UserModel.findById(_id).exec();
+
+		if (!user) throw new BadRequestException(USER_NOT_FOUND(_id));
 
 		const isEmailExits = await this.UserModel.findOne({ email }).exec();
 
@@ -69,5 +72,11 @@ export class UserService {
 		}
 
 		if (errors.messages.length > 0) throw new BadRequestException(errors);
+	}
+
+	async getCount() {
+		return await this.UserModel.find()
+			.count()
+			.exec();
 	}
 }

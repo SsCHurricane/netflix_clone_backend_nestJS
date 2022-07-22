@@ -3,6 +3,7 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpCode,
 	Param,
 	Patch,
 	UsePipes,
@@ -64,6 +65,7 @@ export class UserController {
 	}
 
 	@Delete('delete')
+	@HttpCode(204)
 	@UsePipes(new ValidationPipe())
 	@Auth('admin')
 	async deleteUsers(@Body() dto: DeleteUserDto) {
