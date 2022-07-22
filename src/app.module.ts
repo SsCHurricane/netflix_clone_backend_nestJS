@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { UserHelpersService } from './helpers/userHelpers/user.helpers.service';
 import { UserHelpersModule } from './helpers/userHelpers/user.helpers.module';
+import { MongoHelpersModule } from './helpers/mongo-helpers/mongo-helpers.module';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { UserHelpersModule } from './helpers/userHelpers/user.helpers.module';
 		AuthModule,
 		UserModule,
 		UserHelpersModule,
+		MongoHelpersModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, UserHelpersService],

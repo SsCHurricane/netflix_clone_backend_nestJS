@@ -1,5 +1,4 @@
 import { EMAIL_ALREADY_EXIST, USER_NOT_FOUND } from '@constants/user.constants';
-import { UserHelpersService } from '@helpers/userHelpers/user.helpers.service';
 import { getHashedPassword } from '@helpers/password.helpers';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ModelType } from '@typegoose/typegoose/lib/types';
@@ -10,16 +9,18 @@ import {
 	UpdateUserRole,
 } from './dto/updateUser.dto';
 import { UserModel } from './user.model';
+import { MongoHelpersService } from '@helpers/mongo-helpers/mongo-helpers.service';
+import { UserQueryDto } from './dto/userQuery.dto';
 
 @Injectable()
 export class UserService {
 	constructor(
 		@InjectModel(UserModel) private readonly UserModel: ModelType<UserModel>,
-		private readonly UserHelpersService: UserHelpersService,
+		private readonly MongoHelpersService: MongoHelpersService,
 	) {}
 
 	async getUserById(_id: string) {
-		const user = await this.UserHelpersService.getById(this.UserModel, _id);
+		const user = await this.MongoHelpersService.findById(this.UserModel, _id);
 
 		if (user.role == 'admin') return user;
 
@@ -27,11 +28,14 @@ export class UserService {
 	}
 
 	async updateUserProfile(_id: string, { email, password }: UpdateUserDto) {
-		const user = await this.UserModel.findById(_id).exec();
+		const user = await this.MongoHelpersService.findById(this.UserModel, _id);
 
 		if (!user) throw new BadRequestException(USER_NOT_FOUND(_id));
 
-		const isEmailExits = await this.UserModel.findOne({ email }).exec();
+		const isEmailExits = await this.MongoHelpersService.findOne(
+			this.UserModel,
+			{ email },
+		);
 
 		if (isEmailExits && String(user._id) !== String(isEmailExits._id))
 			throw new BadRequestException(EMAIL_ALREADY_EXIST);
@@ -48,7 +52,7 @@ export class UserService {
 	}
 
 	async updateUserRole({ role, _id }: UpdateUserRole) {
-		const user = await this.UserModel.findById(_id).exec();
+		const user = await this.MongoHelpersService.findById(this.UserModel, _id);
 
 		if (!user) throw new BadRequestException(USER_NOT_FOUND(_id));
 
@@ -59,8 +63,8 @@ export class UserService {
 		return user;
 	}
 
-	async getAllUsers() {
-		return await this.UserModel.find().exec();
+	async getAllUsers(dto: UserQueryDto) {
+		return await this.MongoHelpersService.findMany(this.UserModel, dto);
 	}
 
 	async deleteUsers({ ids }: DeleteUserDto) {
@@ -72,11 +76,5 @@ export class UserService {
 		}
 
 		if (errors.messages.length > 0) throw new BadRequestException(errors);
-	}
-
-	async getCount() {
-		return await this.UserModel.find()
-			.count()
-			.exec();
 	}
 }

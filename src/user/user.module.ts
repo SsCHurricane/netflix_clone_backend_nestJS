@@ -1,13 +1,23 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { UserHelpersModule } from '@helpers/userHelpers/user.helpers.module';
-import { UserHelpersService } from '@helpers/userHelpers/user.helpers.service';
+import { MongoHelpersModule } from '@helpers/mongo-helpers/mongo-helpers.module';
+import { MongoHelpersService } from '@helpers/mongo-helpers/mongo-helpers.service';
+import { TypegooseModule } from 'nestjs-typegoose';
+import { UserModel } from './user.model';
 
 @Module({
-	imports: [UserHelpersModule],
+	imports: [
+		TypegooseModule.forFeature([
+			{
+				typegooseClass: UserModel,
+				schemaOptions: { collection: 'User' },
+			},
+		]),
+		MongoHelpersModule,
+	],
 
 	controllers: [UserController],
-	providers: [UserService, UserHelpersService],
+	providers: [UserService, MongoHelpersService],
 })
 export class UserModule {}

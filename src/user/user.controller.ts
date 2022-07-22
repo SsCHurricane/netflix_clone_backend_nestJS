@@ -6,6 +6,7 @@ import {
 	HttpCode,
 	Param,
 	Patch,
+	Query,
 	UsePipes,
 	ValidationPipe,
 } from '@nestjs/common';
@@ -18,6 +19,7 @@ import {
 	UpdateUserRole,
 } from './dto/updateUser.dto';
 import { idValidationPipe } from '@pipes/idValidationPipe';
+import { UserQueryDto } from './dto/userQuery.dto';
 
 @Controller('user')
 export class UserController {
@@ -60,8 +62,8 @@ export class UserController {
 
 	@Get('all')
 	@Auth('admin')
-	async getAllUsers() {
-		return await this.userService.getAllUsers();
+	async getAllUsers(@Query() dto: UserQueryDto) {
+		return await this.userService.getAllUsers(dto);
 	}
 
 	@Delete('delete')

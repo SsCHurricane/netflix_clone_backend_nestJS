@@ -1,14 +1,12 @@
 import { INVALID_ROLE } from '@constants/errors.constants';
 import {
 	ArrayMinSize,
-	IsArray,
 	IsEmail,
 	IsIn,
 	IsMongoId,
 	IsOptional,
 	IsString,
 	MinLength,
-	ValidateNested,
 } from 'class-validator';
 
 export class UpdateUserDto {
