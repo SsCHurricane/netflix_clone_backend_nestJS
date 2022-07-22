@@ -1,9 +1,12 @@
 import { Type } from 'class-transformer';
 import {
 	IsIn,
+	IsInt,
 	IsNumber,
+	IsNumberString,
 	IsOptional,
 	IsString,
+	Min,
 	ValidateNested,
 } from 'class-validator';
 
@@ -16,24 +19,30 @@ export class SearchDto {
 }
 
 export class SortDto {
+	@IsOptional()
 	@IsString()
-	by: string;
+	by?: string;
 
-	@IsIn([1, -1])
-	order: 1 | -1;
+	@IsOptional()
+	@IsIn(['1', '-1'])
+	order?: 1 | -1;
 }
 export class PaginationDto {
-	@IsNumber()
+	@IsInt()
+	@Type(() => Number)
+	@Min(1)
 	page: number;
 
-	@IsNumber()
+	@IsInt()
+	@Type(() => Number)
+	@Min(1)
 	limit: number;
 }
 
 export class UserQueryDto {
 	@IsOptional()
 	@ValidateNested({ each: true })
-	@IsString()
+	@Type(() => SearchDto)
 	search?: SearchDto;
 
 	@IsOptional()

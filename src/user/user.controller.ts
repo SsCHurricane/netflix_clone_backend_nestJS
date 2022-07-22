@@ -62,7 +62,7 @@ export class UserController {
 
 	@Get('all')
 	@Auth('admin')
-	async getAllUsers(@Query() dto: UserQueryDto) {
+	async getAllUsers(@Query(ValidationPipe) dto: UserQueryDto) {
 		return await this.userService.getAllUsers(dto);
 	}
 
